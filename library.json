@@ -1,0 +1,21 @@
+{
+  "name": "HyperOTA",
+  "keywords": "HyperOTA, OTA, Update, ESP8266, ESP32, over, the, air, firmware, filesystem, littlefs, spiffs",
+  "description": "Blockchain based OTA updates made slick and simple for everyone!",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/Hyper-Updates/HyperOTA"
+  },
+  "authors":
+  [
+    {
+      "name": "Swapnil Shinde",
+      "email": "atmegabuzz@gmail.com",
+      "maintainer": true
+    }
+  ],
+  "version": "3.1.0",
+  "frameworks": "arduino",
+  "platforms": ["espressif8266", "espressif32", "raspberrypi"]
+}
