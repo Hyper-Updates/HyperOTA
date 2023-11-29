@@ -16,8 +16,8 @@ _____ _                        _    ___ _____  _
  * @date 2023-08-30
  */
 
-#ifndef ElegantOTA_h
-#define ElegantOTA_h
+#ifndef HypertOTA_h
+#define HyperOTA_h
 
 #include "Arduino.h"
 #include "stdlib_noniso.h"

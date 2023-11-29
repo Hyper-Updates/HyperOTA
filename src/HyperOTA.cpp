@@ -1,5 +1,5 @@
 #include "HyperOTA.h"
-
+#include "MD5Builder.h"
 
 ElegantOTAClass::ElegantOTAClass(){}
 
@@ -248,7 +248,8 @@ void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username,
     _server->on("/ota/upload", HTTP_POST, [&](){
       if (_authenticate && !_server->authenticate(_username, _password)) {
         return _server->requestAuthentication();
-      }
+      };
+
       // Post-OTA update callback
       if (postUpdateCallback != NULL) postUpdateCallback(!Update.hasError());
       _server->sendHeader("Connection", "close");
@@ -263,6 +264,9 @@ void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username,
     }, [&](){
       // Actual OTA Download
       HTTPUpload& upload = _server->upload();
+
+      // Serial.println(_server->header("Hash")); 
+
       if (upload.status == UPLOAD_FILE_START) {
         // Check authentication
         if (_authenticate && !_server->authenticate(_username, _password)) {
@@ -300,6 +304,18 @@ void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username,
       } else {
         ELEGANTOTA_DEBUG_MSG(String("Update Failed Unexpectedly (likely broken connection): status="+String(upload.status)+"\n").c_str());
       }
+
+      if(!Update.setMD5(_server->header("Hash").c_str())){
+        Serial.println("Invalid Hash");
+      }
+      // Serial.println("==========="); 
+
+      // MD5Builder md;
+      //     md.begin();
+      //     Update.md5String();
+      //     String content((*upload.buf));
+      //     md.add(content);
+      //     md.calculate();
     });
   #endif
 }
