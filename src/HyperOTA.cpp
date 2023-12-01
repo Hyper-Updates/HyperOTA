@@ -1,8 +1,9 @@
 #include "HyperOTA.h"
+#include <ESP8266HTTPClient.h>
 
 ElegantOTAClass::ElegantOTAClass(){}
 
-void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username, const char * password){
+void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username, const char * password, const char * chainCall){
   _server = server;
 
   setAuth(username, password);
@@ -120,6 +121,26 @@ void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username,
           mode = OTA_MODE_FIRMWARE;
         }
       }
+
+      // fetch firm md5 hash from blockchain / hyper-updates
+      HTTPClient http;
+      http.begin(chainCall);
+      http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+      String body = "name=John&class=10";
+      
+      int httpResponseCode = http.POST(body);
+      if (httpResponseCode > 0) {
+        Serial.print("HTTP Response code: ");
+        Serial.println(httpResponseCode);
+
+        String response = http.getString();
+        Serial.println(response);
+      } else {
+        Serial.print("HTTP Request failed with error code: ");
+        Serial.println(httpResponseCode);
+      }
+
+      http.end();
 
       // Get file MD5 hash from arg
       if (_server->hasArg("hash")) {
