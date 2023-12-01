@@ -1,5 +1,4 @@
 #include "HyperOTA.h"
-#include "MD5Builder.h"
 
 ElegantOTAClass::ElegantOTAClass(){}
 
@@ -305,17 +304,6 @@ void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username,
         ELEGANTOTA_DEBUG_MSG(String("Update Failed Unexpectedly (likely broken connection): status="+String(upload.status)+"\n").c_str());
       }
 
-      if(!Update.setMD5(_server->header("Hash").c_str())){
-        Serial.println("Invalid Hash");
-      }
-      // Serial.println("==========="); 
-
-      // MD5Builder md;
-      //     md.begin();
-      //     Update.md5String();
-      //     String content((*upload.buf));
-      //     md.add(content);
-      //     md.calculate();
     });
   #endif
 }
