@@ -7,6 +7,7 @@ void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username,
   _server = server;
 
   setAuth(username, password);
+  Serial.println(chainCall);
 
   #if defined(TARGET_RP2040)
     if (!__isPicoW) {
@@ -123,24 +124,26 @@ void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username,
       }
 
       // fetch firm md5 hash from blockchain / hyper-updates
-      HTTPClient http;
-      http.begin(chainCall);
-      http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-      String body = "name=John&class=10";
+      // HTTPClient http;
+      // WiFiClient wifiClient;  // create a WiFiClient object
+      // http.begin(wifiClient, chainCall);
       
-      int httpResponseCode = http.POST(body);
-      if (httpResponseCode > 0) {
-        Serial.print("HTTP Response code: ");
-        Serial.println(httpResponseCode);
+      // http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+      // String body = "name=John&class=10";
+      
+      // int httpResponseCode = http.POST(body);
+      // if (httpResponseCode > 0) {
+      //   Serial.print("HTTP Response code: ");
+      //   Serial.println(httpResponseCode);
 
-        String response = http.getString();
-        Serial.println(response);
-      } else {
-        Serial.print("HTTP Request failed with error code: ");
-        Serial.println(httpResponseCode);
-      }
+      //   String response = http.getString();
+      //   Serial.println(response);
+      // } else {
+      //   Serial.print("HTTP Request failed with error code: ");
+      //   Serial.println(httpResponseCode);
+      // }
 
-      http.end();
+      // http.end();
 
       // Get file MD5 hash from arg
       if (_server->hasArg("hash")) {
