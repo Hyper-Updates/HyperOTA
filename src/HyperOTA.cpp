@@ -3,11 +3,10 @@
 
 ElegantOTAClass::ElegantOTAClass(){}
 
-void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username, const char * password, const char * chainCall){
+void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username, const char * password){
   _server = server;
 
   setAuth(username, password);
-  Serial.println(chainCall);
 
   #if defined(TARGET_RP2040)
     if (!__isPicoW) {
@@ -122,29 +121,8 @@ void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username,
           mode = OTA_MODE_FIRMWARE;
         }
       }
-
-      // fetch firm md5 hash from blockchain / hyper-updates
-      // HTTPClient http;
-      // WiFiClient wifiClient;  // create a WiFiClient object
-      // http.begin(wifiClient, chainCall);
       
-      // http.addHeader("Content-Type", "application/x-www-form-urlencoded");
-      // String body = "name=John&class=10";
-      
-      // int httpResponseCode = http.POST(body);
-      // if (httpResponseCode > 0) {
-      //   Serial.print("HTTP Response code: ");
-      //   Serial.println(httpResponseCode);
-
-      //   String response = http.getString();
-      //   Serial.println(response);
-      // } else {
-      //   Serial.print("HTTP Request failed with error code: ");
-      //   Serial.println(httpResponseCode);
-      // }
-
-      // http.end();
-
+     
       // Get file MD5 hash from arg
       if (_server->hasArg("hash")) {
         String hash = _server->arg("hash");
@@ -154,6 +132,50 @@ void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username,
           return _server->send(400, "text/plain", "MD5 parameter invalid");
         }
       }
+
+      // Get txid from arg
+      if (_server->hasArg("txid")) {
+        String txid = _server->arg("txid");
+        ELEGANTOTA_DEBUG_MSG(String("Txid: "+txid+"\n").c_str());
+      }
+
+      // verify hash
+      if (WiFi.status() == WL_CONNECTED) {
+
+          String clientIP = _server->client().remoteIP().toString();
+          String checkHashEndpoint = "http://" + clientIP + ":8080" + "/check-hash?transactionid=" + _server->arg("txid") + "&hash=" + _server->arg("hash");
+          Serial.println(checkHashEndpoint);
+
+           // fetch firm md5 hash from blockchain / hyper-updates
+          HTTPClient http;
+          WiFiClient wifiClient;  // create a WiFiClient object
+          http.begin(wifiClient, checkHashEndpoint);
+          
+          http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+          String body = "name=John&class=10";
+          
+          int httpResponseCode = http.POST(body);
+          if (httpResponseCode == 200) {
+            Serial.print("HTTP Response code: ");
+            Serial.println(httpResponseCode);
+
+            String response = http.getString();
+            Serial.println(response);
+          } else {
+            Serial.print("HTTP Request failed with error code: ");
+            Serial.println(httpResponseCode);
+            Update.setMD5("");
+
+          }
+
+          http.end();
+
+      }
+
+      else {
+        Serial.println("Update faild, cannot connect to chain.");
+        Update.setMD5("");
+      } 
 
       #if UPDATE_DEBUG == 1
         // Serial output must be active to see the callback serial prints
@@ -287,8 +309,6 @@ void ElegantOTAClass::begin(ELEGANTOTA_WEBSERVER *server, const char * username,
     }, [&](){
       // Actual OTA Download
       HTTPUpload& upload = _server->upload();
-
-      // Serial.println(_server->header("Hash")); 
 
       if (upload.status == UPLOAD_FILE_START) {
         // Check authentication
