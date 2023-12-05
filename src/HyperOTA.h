@@ -104,7 +104,7 @@ class ElegantOTAClass{
   public:
     ElegantOTAClass();
 
-    void begin(ELEGANTOTA_WEBSERVER *server, const char * username = "", const char * password = "", const char * chainCall = "");
+    void begin(ELEGANTOTA_WEBSERVER *server, const char * username = "", const char * password = "");
 
     void setAuth(const char * username, const char * password);
     void clearAuth();
